@@ -13,8 +13,7 @@ import com.ssam.core.authentication.User;
 import com.ssam.core.authentication.UserManager;
 import com.ssam.core.authentication.datafilter.SessionDataFilter;
 import com.ssam.core.authentication.datafilter.UserDataFilter;
-import com.ssam.core.config.Language;
-import com.ssam.restapi.api.APIRestService.OpenSessionInput;
+import com.ssam.core.main.CoreFactory;
 
 public class APIRestServiceImpl implements APIRestService{
 
@@ -26,11 +25,13 @@ public class APIRestServiceImpl implements APIRestService{
 
 	@Override
 	public OpenSessionOutput openSession(OpenSessionInput openSessionInput, @Context HttpServletRequest request) {
+		CoreFactory.getCoreFactory().openConnection();
 		UserManager userManager = new UserManager();
 		UserDataFilter filter = new UserDataFilter();
 		filter.setUserID(openSessionInput.getUserID());
 		User user = userManager.getUser(filter);
-		if(user != null && user.getSecureToken().contains(openSessionInput.getSecureToken())){
+		
+		if(user != null && user.getSecureTokenList().contains(openSessionInput.getSecureToken())){
 			SecureRandom random = new SecureRandom();
 			Session session = new Session();
 			session.setUser(user);
@@ -46,22 +47,25 @@ public class APIRestServiceImpl implements APIRestService{
 			sessionTemp.setLastActivity(session.getLastActivity());
 			return sessionTemp;
 		}
+		
+		CoreFactory.getCoreFactory().closeConnection();
 		return null;
 	}
 
 
 	@Override
 	public Boolean closeSession(CloseSessionInput closeSessionInput) {
+		CoreFactory.getCoreFactory().openConnection();
 		SessionManager sessionManager = new SessionManager();
 		SessionDataFilter filter = new SessionDataFilter();
-		org.jboss.logging.Logger logger = org.jboss.logging.Logger.getLogger(this.getClass());
-		logger.info("Token:" + closeSessionInput.getToken());
 		filter.setToken(closeSessionInput.getToken());
 		Session session = sessionManager.getSession(filter);
 		if(session != null){
 			sessionManager.deleteSession(session);
+			CoreFactory.getCoreFactory().closeConnection();
 			return true;
 		}
+		CoreFactory.getCoreFactory().closeConnection();
 		return false;
 	}
 	
