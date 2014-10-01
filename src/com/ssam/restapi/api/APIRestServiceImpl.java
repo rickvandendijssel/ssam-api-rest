@@ -14,6 +14,7 @@ import com.ssam.core.authentication.UserManager;
 import com.ssam.core.authentication.datafilter.SessionDataFilter;
 import com.ssam.core.authentication.datafilter.UserDataFilter;
 import com.ssam.core.main.CoreFactory;
+import com.ssam.restapi.main.ErrorType;
 
 public class APIRestServiceImpl implements APIRestService{
 
@@ -42,14 +43,17 @@ public class APIRestServiceImpl implements APIRestService{
 			SessionManager sessionManager = new SessionManager();
 			sessionManager.addSession(session);
 			
-			OpenSessionOutput sessionTemp = new OpenSessionOutput();
-			sessionTemp.setToken(session.getToken());
-			sessionTemp.setLastActivity(session.getLastActivity());
-			return sessionTemp;
+			OpenSessionOutput output = new OpenSessionOutput();
+			output.setToken(session.getToken());
+			output.setLastActivity(session.getLastActivity());
+			return output;
 		}
 		
 		CoreFactory.getCoreFactory().closeConnection();
-		return null;
+		OpenSessionOutput output = new OpenSessionOutput();
+		output.setErrorType(ErrorType.NOPERMISSION);
+		output.setErrorMessage("Secure Token not valid!!!");
+		return output;
 	}
 
 

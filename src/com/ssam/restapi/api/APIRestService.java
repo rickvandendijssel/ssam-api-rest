@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import com.ssam.core.config.Language;
+import com.ssam.restapi.main.AbstractOutput;
 
 
 @Path("/")
@@ -58,7 +59,7 @@ public interface APIRestService {
 		}
 	}
 	
-	public class OpenSessionOutput{
+	public class OpenSessionOutput extends AbstractOutput{
 		private String token;
 		private Date lastActivity;
 		public String getToken() {
